@@ -1,0 +1,37 @@
+{
+  "name": "js-promises",
+  "version": "0.0.1",
+  "author": "David M. Lee, II <leedm777@yahoo.com>",
+  "description": "A demonstration of JavaScript promises",
+  "homepage": "https://github.com/leedm777/js-promises",
+  "scripts": {
+    "doc": "codo",
+    "test": "_mocha test/**/*.litcoffee",
+    "lint": "coffeelint src",
+    "test-watch": "_mocha --watch --reporter min 'test/**/*.litcoffee'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/leedm777/js-promises.git"
+  },
+  "keywords": [
+    "promises",
+    "examples"
+  ],
+  "dependencies": {
+    "q": "^1.0.0"
+  },
+  "devDependencies": {
+    "bluebird": "^1.0.8",
+    "chai": "^1.9.0",
+    "chai-as-promised": "^4.1.1",
+    "coffee-script": "^1.7.1",
+    "coffeelint": "^1.1.0",
+    "mocha": "^1.17.1",
+    "mocha-as-promised": "^2.0.0"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.10"
+  }
+}
