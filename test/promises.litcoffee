@@ -12,7 +12,7 @@ writing promise-based [mocha][] tests. Instead of fooling around with
 the `done` callback, you simply have to return a promise with the
 test's results.
 
-    require("mocha-as-promised")()
+    (require 'mocha-as-promised')()
 
 # What is a promise?
 
@@ -56,7 +56,7 @@ fulfilled. The value of the promise is passed as the first argument.
 
       it 'should deliver a value to .then', ->
         later 42
-          .then (actual) -> expect(actual).to.equal(42)
+          .then (actual) -> (expect actual).to.equal 42
 
 ## onRejected
 
@@ -64,10 +64,10 @@ The `onRejected` handler is called, only once, after the promise is
 rejected. The reason of the promise is passed as the first argument.
 
       it 'should deliver a reason to .then', ->
-        throwLater new Error('Some Error')
+        throwLater new Error 'Some Error'
           .then(
-            (actual) -> assert.fail('should not be called'),
-            (err) -> expect(err.message).to.equal('Some Error'))
+            (actual) -> assert.fail 'should not happen',
+            (err) -> (expect err.message).to.equal 'Some Error')
 
 ## Asynchronous
 
@@ -79,7 +79,7 @@ anyways.
       it 'should callback asynchronously', ->
         x = 'sync'
         p = later 42
-          .then -> expect(x).to.equal('async')
+          .then -> (expect x).to.equal 'async'
         x = 'async'
         p
 
@@ -91,7 +91,7 @@ fulfills as that value.
       it 'should map callback results', ->
         later 42
           .then (x) -> x + 1
-          .then (actual) -> expect(actual).to.equal(43)
+          .then (actual) -> (expect actual).to.equal 43
 
 ## Maps errors
 
@@ -100,10 +100,10 @@ promise with that exception as the reason.
 
       it 'should map callback exceptions', ->
         later 42
-          .then -> throw new Error('Some Error')
+          .then -> throw new Error 'Some Error'
           .then(
-            -> assert.fail('should not be called'),
-            (err) -> expect(err.message).to.equal('Some Error'))
+            -> assert.fail 'should not happen',
+            (err) -> (expect err.message).to.equal 'Some Error')
 
 ## Automagic flatmapping
 
@@ -116,15 +116,15 @@ the assimilation of some non-conformant `then` methods.
       it 'should flatmap promises', ->
         later 42
           .then (x) -> later x + 1
-          .then (actual) -> expect(actual).to.equal(43)
+          .then (actual) -> (expect actual).to.equal 43
 
       it 'should be interoperable', ->
         Bluebird = require 'bluebird'
-        bluebirdLater = (v) -> new Bluebird (resolve) -> resolve(v)
+        bluebirdLater = (v) -> new Bluebird (resolve) -> resolve v
 
         later 42
-          .then (x) -> bluebirdLater(x + 1)
-          .then (actual) -> expect(actual).to.equal(43)
+          .then (x) -> bluebirdLater x + 1
+          .then (actual) -> (expect actual).to.equal 43
 
 # Q extensions
 
@@ -150,14 +150,14 @@ There are corresponding `fail` and `fin` aliases which can be used in
 non-ES5 environments.
 
       it 'should catch exceptions', ->
-        throwLater new Error('Some Error')
-          .then -> assert.fail('should not be called')
-          .catch (err) -> expect(err.message).to.equal('Some Error')
+        throwLater new Error 'Some Error'
+          .then -> assert.fail 'should not happen'
+          .catch (err) -> (expect err.message).to.equal 'Some Error'
 
       it 'should fail if finally fails', ->
         later 42
-          .finally -> throwLater new Error('Finally Error')
-          .catch (err) -> expect(err.message).to.equal('Finally Error')
+          .finally -> throwLater new Error 'Finally Error'
+          .catch (err) -> (expect err.message).to.equal 'Finally Error'
 
 ### Q.all
 
@@ -168,15 +168,15 @@ want to wait for all of the promises to resolve before processing.
 `Q.all` is a wonderfully simple way to handle this.
 
         it 'should resolve all values', ->
-          Q.all [ later(1), later(2), later(3) ]
-            .then (actual) -> expect(actual).to.deep.equal([1, 2, 3])
+          Q.all [ (later 1), (later 2), (later 3) ]
+            .then (actual) -> (expect actual).to.deep.equal [1, 2, 3]
 
 If any promise is rejected, the `Q.all` is rejected
 
         it 'should reject if any are rejected', ->
-          Q.all [ later(1), later(2), throwLater(new Error('All Error'))]
-            .then (actual) -> assert.fail('should not be called')
-            .catch (err) -> expect(err.message).to.equal('All Error')
+          Q.all [ (later 1), (later 2), (throwLater new Error 'All Error')]
+            .then (actual) -> assert.fail 'should not happen'
+            .catch (err) -> (expect err.message).to.equal 'All Error'
 
 `Q.all` silently passes non-promise values through, making it
 convenient to pass values along through the `.then` chain.
@@ -184,7 +184,7 @@ convenient to pass values along through the `.then` chain.
         it 'should pass values along', ->
           later 42
             .then (x) -> Q.all [ x, later x + 1 ]
-            .then (actual) -> expect(actual).to.deep.equal([42, 43])
+            .then (actual) -> (expect actual).to.deep.equal [42, 43]
 
 ### `Q.allSettled`
 
@@ -196,12 +196,12 @@ complete before proceeding, use `Q.allSettled`. The returned promise
 fulfills with the settled values/reasons for all the input promises.
 
         it 'should resolve all values and reasons', ->
-          Q.allSettled [ later(42), throwLater(new Error('All Error'))]
+          Q.allSettled [ (later 42), (throwLater new Error 'All Error')]
             .then (actual) ->
-              expect(actual[0].state).to.equal('fulfilled')
-              expect(actual[0].value).to.equal(42)
-              expect(actual[1].state).to.equal('rejected')
-              expect(actual[1].reason.message).to.equal('All Error')
+              (expect actual[0].state).to.equal 'fulfilled'
+              (expect actual[0].value).to.equal 42
+              (expect actual[1].state).to.equal 'rejected'
+              (expect actual[1].reason.message).to.equal 'All Error'
 
 ### `.spread`
 
@@ -215,18 +215,18 @@ and spreads it across the callbacks arguments.
         it 'should spread arguments', ->
           later [1, 2, 3]
             .spread (a, b, c) ->
-              expect(a).to.equal(1)
-              expect(b).to.equal(2)
-              expect(c).to.equal(3)
+              (expect a).to.equal 1
+              (expect b).to.equal 2
+              (expect c).to.equal 3
 
 This is especially nice in combination with `Q.all`.
 
         it 'should spread well with Q.all', ->
-          Q.all [ later(1), later(2), later(3) ]
+          Q.all [ (later 1), (later 2), (later 3) ]
             .spread (a, b, c) ->
-              expect(a).to.equal(1)
-              expect(b).to.equal(2)
-              expect(c).to.equal(3)
+              (expect a).to.equal 1
+              (expect b).to.equal 2
+              (expect c).to.equal 3
 
 Spread does an implicit `Q.all` on the input array, so when chaining
 `then` handlers together it's unnecessary.
@@ -235,8 +235,8 @@ Spread does an implicit `Q.all` on the input array, so when chaining
           later 42
             .then (x) -> [x, later x + 1]
             .spread (x, y) ->
-              expect(x).to.equal(42)
-              expect(y).to.equal(43)
+              (expect x).to.equal 42
+              (expect y).to.equal 43
 
 # Integrating with callbacks
 
@@ -252,24 +252,24 @@ results of invoking a function.
 
         it 'should fulfill with a functions return value', ->
           Q.fcall -> 42
-            .then (actual) -> expect(actual).to.equal(42)
+            .then (actual) -> (expect actual).to.equal 42
 
         it 'should reject with a functions exceptions', ->
-          Q.fcall -> throw new Error('Some Error')
-            .then -> assert.fail('should not be called')
-            .catch (err) -> expect(err.message).to.equal('Some Error')
+          Q.fcall -> throw new Error 'Some Error'
+            .then -> assert.fail 'should not happen'
+            .catch (err) -> (expect err.message).to.equal 'Some Error'
 
 In these cases, though, it's almost always easier to just use the
 static `Q.fulfill` or `Q.reject` functions.
 
         it 'fulfill is easier', ->
           Q.fulfill 42
-            .then (actual) -> expect(actual).to.equal(42)
+            .then (actual) -> (expect actual).to.equal 42
 
         it 'should reject with a functions exceptions', ->
-          Q.reject new Error('Some Error')
-            .then -> assert.fail('should not be called')
-            .catch (err) -> expect(err.message).to.equal('Some Error')
+          Q.reject new Error 'Some Error'
+            .then -> assert.fail 'should not happen'
+            .catch (err) -> (expect err.message).to.equal 'Some Error'
 
 
 ## Deferred
@@ -282,16 +282,16 @@ is the deferred object.
 
         it 'should fulfill when resolved', ->
           uut = Q.defer()
-          laterClassic 42, (err, x) -> uut.resolve(x)
+          laterClassic 42, (err, x) -> uut.resolve x
           uut.promise
-              .then (actual) -> expect(actual).to.equal(42)
+              .then (actual) -> (expect actual).to.equal 42
 
         it 'should fulfill when rejected', ->
           uut = Q.defer()
-          throwLaterClassic(new Error('Error'), (err, x) -> uut.reject(err))
+          throwLaterClassic (new Error 'Error'), ((err, x) -> uut.reject(err))
           uut.promise
-            .then -> assert.fail('should not be called')
-            .catch (err) -> expect(err.message).to.equal('Error')
+            .then -> assert.fail 'should not happen'
+            .catch (err) -> (expect err.message).to.equal 'Error'
 
 ## Node.js adapters
 
@@ -304,7 +304,7 @@ stacked in an array).
       describe 'nfcall', ->
         it 'should adapt a node.js function', ->
           Q.nfcall laterClassic, 42
-            .then (actual) -> expect(actual).to.equal(42)
+            .then (actual) -> (expect actual).to.equal 42
 
 Or `denodify` can create a reusable wrapper for you.
 
@@ -312,32 +312,32 @@ Or `denodify` can create a reusable wrapper for you.
         it 'should create a wrapper', ->
           uut = Q.denodeify laterClassic
           uut 42
-            .then (actual) -> expect(actual).to.equal(42)
+            .then (actual) -> (expect actual).to.equal 42
 
 There are even adapters for instance methods.
 
       describe 'method adapters', ->
         class ValueObject
           constructor: (@value) ->
-          val: (cb) -> laterClassic(@value, cb)
+          val: (cb) -> laterClassic @value, cb
 
 You can use `ninvoke` to invoke an async instance method and return a
 promise. (Or `npost` if you have the arguments stacked in an array).
 
         describe 'ninvoke', ->
           it 'should create a promise from a method invocation', ->
-            obj = new ValueObject(42)
+            obj = new ValueObject 42
             Q.ninvoke(obj, 'val')
-              .then (actual) -> expect(actual).to.equal(42)
+              .then (actual) -> (expect actual).to.equal 42
 
 Similar to denodify, `nbind` can create a reusable wrapper.
 
         describe 'nbind', ->
           it 'should create a wrapper function', ->
-            obj = new ValueObject(42)
+            obj = new ValueObject 42
             uut = Q.nbind(obj.val, obj)
             uut()
-              .then (actual) -> expect(actual).to.equal(42)
+              .then (actual) -> (expect actual).to.equal 42
 
 ## Creating callback+promise methods
 
@@ -353,23 +353,23 @@ invokes the callback appropriately.
             # Invoke callback when done
             oldSchool(v)
               .done(
-                (res) -> cb(null, res),
-                (err) -> cb(err))
+                ((res) -> cb null, res),
+                (err) -> cb err)
             return
           # Promise based implementation
           if (v == 0)
-            Q.reject(new Error('Zero not allowed'))
+            Q.reject new Error 'Zero not allowed'
           else
-            Q.fulfill(v)
+            Q.fulfill v
 
         it 'should invoke on success', (done) ->
           oldSchool 42, (err, res) ->
-            expect(res).to.equal(42)
+            (expect res).to.equal 42
             done()
 
         it 'should invoke on error', (done) ->
           oldSchool 0, (err, res) ->
-            expect(err.message).to.equal('Zero not allowed')
+            (expect err.message).to.equal 'Zero not allowed'
             done()
 
 # Other useful methods
@@ -385,14 +385,14 @@ timeout on resolving can be specified by the `timeout` method.
           later 42
             .delay 999
             .timeout 100, 'Timeout'
-            .then (actual) -> assert.fail('should not be called')
-            .catch (err) -> expect(err.message).to.equal('Timeout')
+            .then (actual) -> assert.fail 'should not happen'
+            .catch (err) -> (expect err.message).to.equal 'Timeout'
 
         it 'should delay', ->
           later 42
             .delay 100
             .timeout 999
-            .then (actual) -> expect(actual).to.equal(42)
+            .then (actual) -> (expect actual).to.equal 42
 
 ## Sugar methods
 
@@ -404,32 +404,32 @@ sugar, or address common patterns when dealing with promises.
           later { x: 42 }
             .get 'x'
             # same as .then (v) -> v['x']
-            .then (actual) -> expect(actual).to.equal(42)
+            .then (actual) -> (expect actual).to.equal 42
 
         it 'should invoke functions on the value', ->
           later { inc: (x) -> x + 1 }
             .invoke('inc', 41)
-            # same as .then (v) -> v['inc'](41)
-            .then (actual) -> expect(actual).to.equal(42)
+            # same as .then (v) -> v['inc'] 41
+            .then (actual) -> (expect actual).to.equal 42
 
         it 'should get the property names of the value', ->
           later { foo: 1, bar: 2 }
             .keys()
-            # same as .then (v) -> Object.keys(v)
-            .then (actual) -> expect(actual).to.deep.equal(['foo', 'bar'])
+            # same as .then (v) -> Object.keys v
+            .then (actual) -> (expect actual).to.deep.equal ['foo', 'bar']
 
         it 'should thenResolve', ->
           later 1
             .thenResolve 42
             # same as .then -> 42
-            .then (actual) -> expect(actual).to.equal(42)
+            .then (actual) -> (expect actual).to.equal 42
 
         it 'should thenReject', ->
           later 1
-            .thenReject new Error('Some Error')
-            # same as .then -> throw new Error('Some Error')
-            .then -> assert.fail('should not be called')
-            .catch (err) -> expect(err.message).to.equal('Some Error')
+            .thenReject new Error 'Some Error'
+            # same as .then -> throw new Error 'Some Error'
+            .then -> assert.fail 'should not happen'
+            .catch (err) -> (expect err.message).to.equal 'Some Error'
 
 # Other stuff to keep in mind
 
@@ -458,11 +458,11 @@ This forces your caller to build the deferred before invoking your
 function, and extract its promise before then can do anything with it.
 
     dontDoThis = (deferred, v) ->
-      deferred.fulfill(v)
+      deferred.fulfill v
 
     becauseOfThis = ->
       d = Q.deferred() # This pattern is duplicated by all callers
-      dontDoThis(d, 42)
+      dontDoThis d, 42
       d.promise
         .then (v) ->
 
@@ -470,11 +470,11 @@ It's better to just build the deferred yourself. Often times, you can
 do it more efficiently, anyways.
 
     doThisInstead = (v) ->
-      Q.fulfill(v)
+      Q.fulfill v
 
     becauseClientCodeIsNicer = ->
-      doThisInstead(42)
-        .then(v) ->
+      doThisInstead 42
+        .then (v) ->
 
 ## Either return or end your promises
 
@@ -536,18 +536,18 @@ and then continues on with execution.
     describe('JavaScript generator', function () {
       it('should look like normal code', function () {
         Q.spawn(function *() {
-          var actual = yield later(42);
-          expect(actual).to.equal(42);
+          var actual = yield later 42;
+          (expect actual).to.equal 42;
         });
       });
 
       it('even exceptions should look normal', function () {
         Q.spawn(function *() {
           try {
-            yield throwLater(new Error('Some Error'));
-            assert.fail('should not execute');
+            yield throwLater new Error 'Some Error';
+            assert.fail 'should not happen';
           } catch (err) {
-            expect(err.message).to.equal('Some Error');
+            (expect err.message).to.equal 'Some Error';
           }
         });
       });
@@ -559,11 +559,11 @@ and then continues on with execution.
 
 In case you're curious about the functions I used the above specs.
 
-    later = (value) -> Q.fulfill(value)
-    throwLater = (err) -> Q.reject(err)
+    later = (value) -> Q.fulfill value
+    throwLater = (err) -> Q.reject err
 
-    laterClassic = (value, cb) -> process.nextTick(-> cb(null, value))
-    throwLaterClassic = (err, cb) -> process.nextTick(-> cb(err))
+    laterClassic = (value, cb) -> process.nextTick -> (cb null, value)
+    throwLaterClassic = (err, cb) -> process.nextTick -> (cb err)
 
 
  [Promises/A+]: http://promisesaplus.com/
