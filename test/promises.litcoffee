@@ -347,11 +347,11 @@ for this is to accept the callback as an optional parameter. If a
 callback is provided, then chain a `done` on the returned promise that
 invokes the callback appropriately.
 
-      describe 'old school', ->
-        oldSchool = (v, cb) ->
+      describe 'backward compatible', ->
+        laterCompat = (v, cb) ->
           if (cb)
             # Invoke callback when done
-            oldSchool(v)
+            laterCompat(v)
               .done(
                 ((res) -> cb null, res),
                 (err) -> cb err)
@@ -362,15 +362,26 @@ invokes the callback appropriately.
           else
             Q.fulfill v
 
-        it 'should invoke on success', (done) ->
-          oldSchool 42, (err, res) ->
-            (expect res).to.equal 42
-            done()
+        describe 'using callbacks', ->
+          it 'should invoke on success', (done) ->
+            laterCompat 42, (err, res) ->
+              (expect res).to.equal 42
+              done()
 
-        it 'should invoke on error', (done) ->
-          oldSchool 0, (err, res) ->
-            (expect err.message).to.equal 'Zero not allowed'
-            done()
+          it 'should invoke on error', (done) ->
+            laterCompat 0, (err, res) ->
+              (expect err.message).to.equal 'Zero not allowed'
+              done()
+
+        describe 'using promises', ->
+          it 'should fullfill a promise', ->
+            laterCompat 42
+              .then (actual) -> (expect actual).to.equal 42
+
+          it 'should reject a promise', ->
+            laterCompat 0
+              .then -> assert.fail 'should not happen'
+              .catch (err) -> (expect err.message).to.equal 'Zero not allowed'
 
 # Other useful methods
 
