@@ -7,12 +7,9 @@ The code itself is written as [mocha][] specs, with [chai][] expectations.
     chai = require 'chai'
     expect = chai.expect
 
-I'll use the [mocha-as-promised][] extension, which is helpful for
-writing promise-based [mocha][] tests. Instead of fooling around with
-the `done` callback, you simply have to return a promise with the
-test's results.
-
-    (require 'mocha-as-promised')()
+So [mocha][] specs have a neat feature regarding promises. Instead of
+fooling around with the `done` callback, you simply have to return a
+promise with the test's results.
 
 # What is a promise?
 
@@ -581,7 +578,6 @@ In case you're curious about the functions I used the above specs.
  [Q]: http://documentup.com/kriskowal/q/
  [chai]: http://chaijs.com/api/bdd/
  [defn]: http://promisesaplus.com/#point-2
- [mocha-as-promised]: https://github.com/domenic/mocha-as-promised
  [mocha]: http://visionmedia.github.io/mocha/
  [golden rule]: https://github.com/kriskowal/q/wiki/API-Reference#wiki-promisedoneonfulfilled-onrejected-onprogress
  [Harmony Generators]: http://wiki.ecmascript.org/doku.php?id=harmony:generators
