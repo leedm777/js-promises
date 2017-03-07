@@ -11,4 +11,4 @@ run by simply:
 
  [Promises/A+]: http://promisesaplus.com/
  [Q]: http://documentup.com/kriskowal/q/
- [Mocha]: http://visionmedia.github.io/mocha/
+ [Mocha]: http://mochajs.org/
